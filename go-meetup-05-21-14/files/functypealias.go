@@ -5,12 +5,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-        http.Handle("/", &MyHandler{})
+        http.Handle("/", &MyHandler{}) // HL
         log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-type HandlerFunc func(ResponseWriter, *Request)
-
-func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
-        f(w, r)
-}

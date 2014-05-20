@@ -131,7 +131,8 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 * The Type System
 .image files/images/gointer1.png
 
-- 2 words
+- Types (structs, functions, primitives) define the memory layout of some blob.
+- Interfaces are 2 words
 - itable, pointer to data
 
 .image files/images/gointer2.png
@@ -186,46 +187,86 @@ In contrast, the implementation of this program in a dynamic language like Small
 * Some Design Patterns
 
 * Pimp My Interface Pattern
+# So we know structs can anonymously embed other structs and inherit their interfaces. But structs can also embed interfaces. Without necessarily being aware of the concrete receiver.
+# Similar to what you would do in Java by subclassing or extending an interface.
 (embedding interfaces in structs and extending/overriding methods)
 
+.code files/pimp.go
+
 * The Unimplementable Public Interface
+- Java can't do this (at least not easily).
+- You almost never want to do this. Except when you do (eg. union types).
+- Still mockable in tests.
+# By creating an exported interface with an unexported method, you create an interface that has a finite number of possible concrete types, which means you can safely use it by type selections onto those types.  It's a useful idiom in the absence of an actual union type.
+
+.code files/unimplementable.go
 
 * Interface Subsetting 
-- Subset of an interface without having to change the type hierarchy
+- Subset of an interface *without*having*to*change*the*type*hierarchy*
+
+.code files/subinterface.go
+
 
 * Functions as types 
+- Function literals and closures.
 - That can then implement interfaces.
-
 - Type Aliasing is awesome.
 
-.code files/typealias.go
+.code files/functypealias.go
+
+* Functions as types 
+- Function literals and closures.
+- That can then implement interfaces.
+- Type Aliasing is awesome.
+
+.code files/functypealias2.go
+
+* Functions as types 
+- Functional progamming is enhanced by type aliasing.
+- Two functions can have the same *signature*, but mean semantically different things.
+- Having multiple parameters to a function with the same type opens you up to programmer error.
+
+.code files/functypealias3.go
+
 
 * Slices can be aliased too!
 - API sugar.
 
 - Type Aliasing is awesome :).
 
-.code files/typealias2.go
+.code files/slicetypealias.go
 
 
 * Easy Parallelization
 - Fork - merge 
 
-* Timeout anything
-- Select with timeout
+.code files/forkmerge.go
 
-* 
+* Easy Parallelization (Fork-merge continued)
+# Extend it to allow error handling, as well as work to take place while you are waiting to merge stuff.
+
+.code files/forkmerge2.go
+
+* Timeout anything
+- Select with timeout. Lets you timeout any long running task!
+
+.code files/timeout.go
+
 
 * The Wats
 
 * Go Gotchas
-- Variable shadowing
+- Variable shadowing ( :=, though convenient, can sometimes cause problems in nested scopes )
 
 - Lack of generics
 
 - interfaces and nil (assigning to nil, passing nil as function arg)
+# Rules around when an interface value == nil can be confusing.
 
 - boxing weirdness
+
+- Calling *defer* can be a perf issue in tight loops.
+# Adds an object allocation and a push/pop at runtime. 
 
 * Dealing With A Lack Of Generics
 - Use Functional style operating on primitives or simple stucts.
