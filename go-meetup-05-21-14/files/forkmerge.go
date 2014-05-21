@@ -2,9 +2,9 @@ func DoStuffInParallel(things []Foo) map[string]string {
   c := make(chan map[string]string)
 
   for _, thing := range things {
-    go func(thing) {
+    go func(thing) { // HL
       c <- doWorkOnSingleThing(thing)
-    }(thing)
+    }(thing) // HL
   }
   
   mergedResults := make(map[string]string)  

@@ -6,21 +6,25 @@ A pragmatic look at the language design of Go
 Jaime Yap
 jaime@monetology.com
 http://jaimeyap.com
+https://github.com/donjaime
+
+# Yes Go is Compiled. Spits out a binary that's easy to deploy.
+# And Go programs tend to have a Low memory baseline.
+# But isn't a talk about the tooling or the runtime. This is a talk that summarizes a few lunchtime conversations we've had around the office about Go and it's language design. 
 
 * The w00ts and the Wats (but mostly w00ts)
-# Yes Go is Compiled. Spits out a binary
-# And Go programs tend to have a Low memory baseline
 
 - The essence of Go.
-# Talk about some of the core language design decisions, insights, and philosophies that went in to the design of the code bits of Go. This is some good background and adds color to any conversation about the language.
+# Talk about some of the core language design decisions, insights, and philosophies that went in to the design of Go. I say that like I worked on Go with Rob Pike and Russ Cox. But this is mostly background gleaned from blog posts the Go team has made, and from the Go docs. It adds color to any conversation about the language.
 
 - Interfaces and the Type System.
-# What an interface is. And why it's so damn cool.
+# What an interface is. And why they are so damn cool.
 
-- A few cool design patterns.
+- A few interesting (and hopefully useful) design patterns.
+# Show some code samples.
 
 - The Wats (and how to mitigate them).
-# As awesome as Go is, it is not without its flaws. There are a few wrinkles that are worth mentioning, along with strategies to mitigate them.
+# As awesome as Go is, it is not without its flaws. So there are a few "Wats" that are worth mentioning, along with strategies to mitigate them.
 
 .image files/images/gopher.png
 
@@ -46,23 +50,36 @@ Advanced concurrency patterns in Go
 
 
 * The Essence Of Go
+# Go started out as a project by a bunch of C guys, who wanted to design a replacement for C++ at Google. But to their surprise, they ended up making a language that was loved by Python and Ruby programmers.
+
+Less is exponentially more - Rob Pike
+
+.link http://commandcenter.blogspot.com/2012/06/less-is-exponentially-more.html
+
+# Philosophically, Less is exponentially more. But more concretely, how this manifests in the language is...
+
 - Separation of data and interfaces.
 
+- Composition.
+# Recurring theme in Go. Spans everything from implementation inheritance to concurrency.
+
 - Explicit control flow.
+# No magic destructors or non-local side-effects. No constructors. No non-local error handling.
 
 - Convention and simplicity over language bloat.
 # Language features interact with eachother on the order of the cross product of the number of features. Often in unexpected ways. 
 
 # You’ll see this manifest from everything from visibility to error handling. Go wants you to do things one way, which helps to make code you didn’t write, easier to grok.
 
+# The features that have been brought into the language are very intentional. 
+
 # You get as a side effect, a fast compiler.
+
+- Simple[r] concurrency.
+# Modern language designed for building concurrent services, with multi-core architectures in mind.
 
 - Usecase driven Core Libraries. Designed with a purpose.
 # Not really language design so to speak. Kinda sneaking this one in there. But I think it's worth mentioning. the libraries in Go are ruthlessly pragmatic.
-
-Less is exponentially more - Rob Pike
-
-.link http://commandcenter.blogspot.com/2012/06/less-is-exponentially-more.html
 
 
 * The Essence Of Go (Separation of data and interfaces) 
@@ -91,7 +108,7 @@ _"Smart_data_structures_and_dumb_code_works_a_lot_better_than_the_other_way_arou
 
 _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_of_academic_work_to_be_taxonomy._And_you_know_what?_Type_hierarchies_are_just_taxonomy"_ - Rob Pike
 
-# I'm not dissing all OO in general. Or that type hierarchies are always wrong. I'm just saying that it shouldn't be the only tool in your toolchest. Or even always the first one you draw upon.
+# I'm not dissing OO in general. Or that type hierarchies are always wrong. I'm just saying that it shouldn't be the only tool in your toolchest. Or maybe not even the first one you draw upon.
 
 
 * The Essence Of Go (Separation of data and interfaces)
@@ -102,7 +119,7 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 - No virtual dispatch by design. 
 # Some people want it, but in the spirit of "simpler means fewer compounding edge cases", Go chose to avoid it entirely.
-# Virtual dispatch has a bunch of sharp corners. C++ destructors calling virtual methods. Java calling out to methods that reference uninitialized state in constructors. etc...
+# Virtual dispatch has a bunch of sharp corners. C++ destructors calling virtual methods. Java calling out to overridden methods that reference uninitialized state in constructors. etc...
 
 .code files/composition.go
 
@@ -122,6 +139,7 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 - Use Interfaces when you want to communicate *Capability*.
 
 * The Type System
+# Go interfaces are implicitly implemented. Here we have an example of Interface composition.
 .code files/interfaces.go
 
 
@@ -137,11 +155,11 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 .image files/images/gointer2.png
 
-# Languages with methods typically fall into one of two camps: prepare tables for all the method calls statically (as in C++ and Java), or do a method lookup at each call (as in Smalltalk and its many imitators, JavaScript and Python included) and add fancy caching to make that call efficient. Go sits halfway between the two: it has method tables but computes them at run time.
+# itables -> Languages with methods typically fall into one of two camps: prepare the tables for all the method calls statically (as in C++ and Java), or do a method lookup at each call (as in Smalltalk and dynamic languages like JavaScript and Python) and add fancy caching to make that call efficient. Go sits halfway between the two: it has precomputed method tables but it derives the final itable at run time, and then caches the result.
 
-# Go's dynamic type conversions mean that it isn't reasonable for the compiler or linker to precompute all possible itables: there are too many (interface type, concrete type) pairs, and most won't be needed. 
+# The reason it does this is that Go supports dynamic type conversions. It mean that it isn't reasonable for the compiler or linker to permute all possible itables: there are too many (interface type, concrete type) pairs, and most won't be needed. 
 
-# The interface runtime computes the itable by looking for each method listed in the interface type's method table in the concrete type's method table. The runtime caches the itable after generating it, so that this correspondence need only be computed once.
+# The interface runtime computes the itable by looking for each method listed in the interface type's method table, in the concrete type's method table. The runtime caches the itable after generating it, so that this correspondence need only be computed once.
 
 .link http://research.swtch.com/interfaces
 
@@ -152,9 +170,15 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
   4       fmt.Println(s.String())
   5   }
 
-In Go, the itable gets computed (or found in a cache) during the assignment on line 2; the dispatch for the s.String() call executed on line 4 is a couple of memory fetches and a single indirect call instruction.
+- The itable gets computed (or found in a cache) during the assignment on line 2
 
-In contrast, the implementation of this program in a dynamic language like Smalltalk (or JavaScript, or Python, or ...) would do the method lookup at line 4, which in a loop repeats needless work. The cache mentioned earlier makes this less expensive than it might be, but it's still more expensive than a single indirect call instruction.
+# In Go, the itable gets computed (or found in a cache) during the assignment on line 2; the dispatch for the s.String() call executed on line 4 is a couple of memory fetches and a single indirect call instruction.
+
+- Smalltalk (or JavaScript, or Python, or ...) would do the method lookup at line 4, which in a loop repeats needless work. 
+
+# In contrast, the implementation of this program in a dynamic language like Smalltalk (or JavaScript, or Python, or ...) would do the method lookup at line 4, which in a loop repeats needless work. 
+
+# The cache mentioned earlier makes this less expensive than it might be, but it's still more expensive than a single indirect call instruction.
 
 
 * Concurrency
@@ -186,18 +210,11 @@ In contrast, the implementation of this program in a dynamic language like Small
 
 * Some Design Patterns
 
-* Pimp My Interface Pattern
-# So we know structs can anonymously embed other structs and inherit their interfaces. But structs can also embed interfaces. Without necessarily being aware of the concrete receiver.
-# Similar to what you would do in Java by subclassing or extending an interface.
-(embedding interfaces in structs and extending/overriding methods)
-
-.code files/pimp.go
-
 * The Unimplementable Public Interface
-- Java can't do this (at least not easily).
 - You almost never want to do this. Except when you do (eg. union types).
+- Java can't do this (at least not easily).
 - Still mockable in tests.
-# By creating an exported interface with an unexported method, you create an interface that has a finite number of possible concrete types, which means you can safely use it by type selections onto those types.  It's a useful idiom in the absence of an actual union type.
+# When you want to create an interface that has a finite number of possible concrete types, which means you can safely use it by type selections onto those types. Go doesn't actually have union types. But this is a useful idiom in the absence of an actual union type.
 
 .code files/unimplementable.go
 
@@ -205,23 +222,33 @@ In contrast, the implementation of this program in a dynamic language like Small
 - Subset of an interface *without*having*to*change*the*type*hierarchy*
 
 .code files/subinterface.go
+# You can pass a reference to LostOfStuff to any method that takes a ThePartsICareAbout since it will implicitly implement the interface.
 
 
-* Functions as types 
-- Function literals and closures.
-- That can then implement interfaces.
-- Type Aliasing is awesome.
+* Pimp My Interface Pattern
+# So we know structs can anonymously embed other structs and inherit their interfaces. But structs can also embed interfaces. Without necessarily being aware of the concrete receiver.
+# Similar to what you would do in Java by subclassing or extending an interface.
+(embedding interfaces in structs and overriding methods)
+
+.code files/pimp.go
+
+
+* The Simple HTTP Server
 
 .code files/functypealias.go
 
+- Can we make it even simpler?
+
+
 * Functions as types 
 - Function literals and closures.
+- We can assign type aliases to function signatures.
 - That can then implement interfaces.
 - Type Aliasing is awesome.
 
 .code files/functypealias2.go
 
-* Functions as types 
+* Functions as types (part deux)
 - Functional progamming is enhanced by type aliasing.
 - Two functions can have the same *signature*, but mean semantically different things.
 - Having multiple parameters to a function with the same type opens you up to programmer error.
@@ -270,7 +297,7 @@ In contrast, the implementation of this program in a dynamic language like Small
 
 * Dealing With A Lack Of Generics
 - Use Functional style operating on primitives or simple stucts.
-# Because Go structs force you to model your data independently from api/code, you often work around the Class-oriented design patterns that come naturally in Java. You can often express something that would have traditionally used generics in a language like Java, simply by using lambdas and regular functions on basic data types. You can decompose your problem functionally to express "generic" algorithms without needing to define actual generic containers or methods.
+# Because Go structs force you to model your data independently from api/code. You can often express something that would have traditionally used generics in a language like Java, simply by using lambdas and regular functions on basic data types. You can decompose your problem functionally to express "generic" algorithms without needing to define actual generic containers or methods.
 
 - Define interfaces in places where you want a covariant generic assignment.
 # This unfortunately sometimes ends up violating DRY when concrete structs have to have their own implementations for methods to conform to an interface, but struct embedding can provide "implementation inheritance" to work around this for many use cases. Though this doesn't help you in situations where you want to treat a stuct polymorphically though, since Go doesn't support actual polymorphic dispatch. I find for the most part that when I would think to use polymorphism, I can actually get away with using some functional stuff from #1.
