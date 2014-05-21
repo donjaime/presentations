@@ -4,9 +4,12 @@ A pragmatic look at the language design of Go
 21 May 2014
 
 Jaime Yap
-jaime@monetology.com
-http://jaimeyap.com
+jaime@thefullstory.com
 https://github.com/donjaime
+
+* Who am i
+
+.html files/fullstory.html
 
 # Yes Go is Compiled. Spits out a binary that's easy to deploy.
 # And Go programs tend to have a Low memory baseline.
@@ -15,13 +18,13 @@ https://github.com/donjaime
 * The w00ts and the Wats (but mostly w00ts)
 
 - The essence of Go.
-# Talk about some of the core language design decisions, insights, and philosophies that went in to the design of Go. I say that like I worked on Go with Rob Pike and Russ Cox. But this is mostly background gleaned from blog posts the Go team has made, and from the Go docs. It adds color to any conversation about the language.
+# Talk about some of the core insights, language design decisions, and philosophies that went in to the design of Go. I say that like I worked on Go with Rob Pike, but I didnt :). This is mostly background gleaned from blog posts the Go team has made, and from the Go docs. It adds color to any conversation about the language.
 
 - Interfaces and the Type System.
-# What an interface is. And why they are so damn cool.
+# We'll cover the type system. What an interface is. And why they are so damn cool.
 
 - A few interesting (and hopefully useful) design patterns.
-# Show some code samples.
+# We'll also show some code samples.
 
 - The Wats (and how to mitigate them).
 # As awesome as Go is, it is not without its flaws. So there are a few "Wats" that are worth mentioning, along with strategies to mitigate them.
@@ -56,7 +59,7 @@ Less is exponentially more - Rob Pike
 
 .link http://commandcenter.blogspot.com/2012/06/less-is-exponentially-more.html
 
-# Philosophically, Less is exponentially more. But more concretely, how this manifests in the language is...
+# Philosophically, Go is all about Less is exponentially more. But more concretely, how this manifests in the language is...
 
 - Separation of data and interfaces.
 
@@ -146,22 +149,25 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 * The Type System
 .image files/images/interfaces-icp.png 449 800
 
+# So go interfaces support duck typing. Composition. Subsetting. Dynamic casting. Reflection. Are statically checked by the compiler. How the heck does that work?
+
+
 * The Type System
+- Types (structs, functions, primitives) define the memory layout of some blob.
+
 .image files/images/gointer1.png
 
-- Types (structs, functions, primitives) define the memory layout of some blob.
-- Interfaces are 2 words
-- itable, pointer to data
+- Interfaces are 2 words. A pointer to an itable, and a pointer to data.
 
 .image files/images/gointer2.png
+
+.link http://research.swtch.com/interfaces
 
 # itables -> Languages with methods typically fall into one of two camps: prepare the tables for all the method calls statically (as in C++ and Java), or do a method lookup at each call (as in Smalltalk and dynamic languages like JavaScript and Python) and add fancy caching to make that call efficient. Go sits halfway between the two: it has precomputed method tables but it derives the final itable at run time, and then caches the result.
 
 # The reason it does this is that Go supports dynamic type conversions. It mean that it isn't reasonable for the compiler or linker to permute all possible itables: there are too many (interface type, concrete type) pairs, and most won't be needed. 
 
 # The interface runtime computes the itable by looking for each method listed in the interface type's method table, in the concrete type's method table. The runtime caches the itable after generating it, so that this correspondence need only be computed once.
-
-.link http://research.swtch.com/interfaces
 
 * A Note on method lookup Performance
   1   var any interface{}  // initialized elsewhere
@@ -185,6 +191,7 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 * Concurrency
 - Communicating Sequential Processes (CSP).
+# Based on message passing via channels.
 
 - Continues the theme of composition. The composition of independently executing computations.
 
@@ -196,7 +203,7 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 - Cooperative scheduling that yields on I/O and some function calls.
 
-- Use Go routines without needing to worry about blocking I/O. You can use a lot of them.
+- Use Go routines without needing to worry about blocking I/O. 
 # Ever written a multi-threaded server in Java know how painful it can be sharing a small number of threads.
 
 - Magnificent synchronization primitives in the form of channels and selects.
