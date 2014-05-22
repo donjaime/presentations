@@ -12,6 +12,7 @@
         wg.Done() // HL
       case err := <-errorsChan:
         errs = append(errs, err)
+        wg.Done()
       case <-quit:
         return
       }

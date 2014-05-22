@@ -4,24 +4,31 @@ A pragmatic look at the language design of Go
 21 May 2014
 
 Jaime Yap
+Developer, FullStory
 jaime@thefullstory.com
 https://github.com/donjaime
 
+###########
+# SLIDE 1
+###########
 * Who am i
 
 .html files/fullstory.html
 
-# Yes Go is Compiled. Spits out a binary that's easy to deploy.
-# And Go programs tend to have a Low memory baseline.
-# But isn't a talk about the tooling or the runtime. This is a talk that summarizes a few lunchtime conversations we've had around the office about Go and it's language design. 
-
+###########
+# SLIDE 2
+###########
 * The w00ts and the Wats (but mostly w00ts)
 
+# Yes Go is Compiled. Spits out a binary that's easy to deploy.
+# And Go programs tend to have a Low memory baseline, ship with great profiling tools and all that.
+# But isn't a talk about the tooling or the runtime. This is a talk about the design of the Go language itself. This can be fuel for language holy wars, but hopefully we can skip past all that :).
+
 - The essence of Go.
-# Talk about some of the core insights, language design decisions, and philosophies that went in to the design of Go. I say that like I worked on Go with Rob Pike, but I didnt :). This is mostly background gleaned from blog posts the Go team has made, and from the Go docs. It adds color to any conversation about the language.
+# Talk about some of the core insights, language design decisions, and philosophies that went in to the design of Go. I say that like I worked on Go with Rob Pike, but I didnt :). This is mostly background that adds color to any conversation about the language.
 
 - Interfaces and the Type System.
-# We'll cover the type system. What an interface is. And why they are so damn cool.
+# We'll cover the type system. What an interface is. And why they are cool.
 
 - A few interesting (and hopefully useful) design patterns.
 # We'll also show some code samples.
@@ -32,6 +39,9 @@ https://github.com/donjaime
 .image files/images/gopher.png
 
 
+###########
+# SLIDE 3
+###########
 * Not A Concurrency Talk
 - Yes. I'm covering concurrency :). 
 # Can't do a language talk about Go without covering concurrency.
@@ -51,7 +61,9 @@ Advanced concurrency patterns in Go
 .link http://talks.golang.org/2013/advconc.slide
 
 
-
+###########
+# SLIDE 4
+###########
 * The Essence Of Go
 # Go started out as a project by a bunch of C guys, who wanted to design a replacement for C++ at Google. But to their surprise, they ended up making a language that was loved by Python and Ruby programmers.
 
@@ -85,6 +97,9 @@ Less is exponentially more - Rob Pike
 # Not really language design so to speak. Kinda sneaking this one in there. But I think it's worth mentioning. the libraries in Go are ruthlessly pragmatic.
 
 
+###########
+# SLIDE 5
+###########
 * The Essence Of Go (Separation of data and interfaces) 
 
 _"Bad_programmers_worry_about_the_code._Good_programmers_worry_about_data_structures_and_their_relationships."_ 
@@ -99,6 +114,9 @@ _"Smart_data_structures_and_dumb_code_works_a_lot_better_than_the_other_way_arou
 - Eric S. Raymond, The Cathedral and The Bazaar.
 
 
+###########
+# SLIDE 6
+###########
 * The Essence Of Go (Separation of data and interfaces) 
 
 - Model your data first. 
@@ -114,6 +132,9 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 # I'm not dissing OO in general. Or that type hierarchies are always wrong. I'm just saying that it shouldn't be the only tool in your toolchest. Or maybe not even the first one you draw upon.
 
 
+###########
+# SLIDE 7
+###########
 * The Essence Of Go (Separation of data and interfaces)
 
 "But code re-use and DRY matter when architecting your programs. If Go doesn’t follow traditional OO, how can we accomplish that which explicit implementation inheritance does?"
@@ -127,6 +148,9 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 .code files/composition.go
 
 
+###########
+# SLIDE 8
+###########
 * The Type System
 - The Go Type System hinges around the concept of the Go *Interface*.
 
@@ -141,17 +165,27 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 - Use Interfaces when you want to communicate *Capability*.
 
+
+###########
+# SLIDE 9
+###########
 * The Type System
 # Go interfaces are implicitly implemented. Here we have an example of Interface composition.
 .code files/interfaces.go
 
 
+###########
+# SLIDE 10
+###########
 * The Type System
 .image files/images/interfaces-icp.png 449 800
 
 # So go interfaces support duck typing. Composition. Subsetting. Dynamic casting. Reflection. Are statically checked by the compiler. How the heck does that work?
 
 
+###########
+# SLIDE 11
+###########
 * The Type System
 - Types (structs, functions, primitives) define the memory layout of some blob.
 
@@ -169,6 +203,10 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 # The interface runtime computes the itable by looking for each method listed in the interface type's method table, in the concrete type's method table. The runtime caches the itable after generating it, so that this correspondence need only be computed once.
 
+
+###########
+# SLIDE 12
+###########
 * A Note on method lookup Performance
   1   var any interface{}  // initialized elsewhere
   2   s := any.(Stringer)  // dynamic conversion
@@ -187,8 +225,14 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 # The cache mentioned earlier makes this less expensive than it might be, but it's still more expensive than a single indirect call instruction.
 
 
+###########
+# SLIDE 13
+###########
 * Concurrency
 
+###########
+# SLIDE 14
+###########
 * Concurrency
 - Communicating Sequential Processes (CSP).
 # Based on message passing via channels.
@@ -211,12 +255,22 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 - More traditional mutexes, semaphores, etc... when you need it.
 
 
+###########
+# SLIDE 15
+###########
 * So....
 .image files/images/whatdoesitmean.jpg 449 800
 
 
+###########
+# SLIDE 16
+###########
 * Some Design Patterns
 
+
+###########
+# SLIDE 17
+###########
 * The Unimplementable Public Interface
 - You almost never want to do this. Except when you do (eg. union types).
 - Java can't do this (at least not easily).
@@ -225,6 +279,10 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 .code files/unimplementable.go
 
+
+###########
+# SLIDE 18
+###########
 * Interface Subsetting 
 - Subset of an interface *without*having*to*change*the*type*hierarchy*
 
@@ -232,6 +290,9 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 # You can pass a reference to LostOfStuff to any method that takes a ThePartsICareAbout since it will implicitly implement the interface.
 
 
+###########
+# SLIDE 19
+###########
 * Pimp My Interface Pattern
 # So we know structs can anonymously embed other structs and inherit their interfaces. But structs can also embed interfaces. Without necessarily being aware of the concrete receiver.
 # Similar to what you would do in Java by subclassing or extending an interface.
@@ -240,6 +301,9 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 .code files/pimp.go
 
 
+###########
+# SLIDE 20
+###########
 * The Simple HTTP Server
 
 .code files/functypealias.go
@@ -247,6 +311,9 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 - Can we make it even simpler?
 
 
+###########
+# SLIDE 21
+###########
 * Functions as types 
 - Function literals and closures.
 - We can assign type aliases to function signatures.
@@ -255,6 +322,10 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 
 .code files/functypealias2.go
 
+
+###########
+# SLIDE 22
+###########
 * Functions as types (part deux)
 - Functional progamming is enhanced by type aliasing.
 - Two functions can have the same *signature*, but mean semantically different things.
@@ -263,6 +334,9 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 .code files/functypealias3.go
 
 
+###########
+# SLIDE 23
+###########
 * Slices can be aliased too!
 - API sugar.
 
@@ -271,24 +345,38 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 .code files/slicetypealias.go
 
 
+###########
+# SLIDE 24
+###########
 * Easy Parallelization
 - Fork - merge 
 
 .code files/forkmerge.go
 
+###########
+# SLIDE 25
+###########
 * Easy Parallelization (Fork-merge continued)
 # Extend it to allow error handling, as well as work to take place while you are waiting to merge stuff.
 
 .code files/forkmerge2.go
 
+###########
+# SLIDE 26
+###########
 * Timeout anything
 - Select with timeout. Lets you timeout any long running task!
 
 .code files/timeout.go
 
-
+###########
+# SLIDE 27
+###########
 * The Wats
 
+###########
+# SLIDE 28
+###########
 * Go Gotchas
 - Variable shadowing ( :=, though convenient, can sometimes cause problems in nested scopes )
 
@@ -302,6 +390,10 @@ _"My_late_friend_Alain_Fournier_once_told_me_that_he_considered_the_lowest_form_
 - Calling *defer* can be a perf issue in tight loops.
 # Adds an object allocation and a push/pop at runtime. 
 
+
+###########
+# SLIDE 29
+###########
 * Dealing With A Lack Of Generics
 - Use Functional style operating on primitives or simple stucts.
 # Because Go structs force you to model your data independently from api/code. You can often express something that would have traditionally used generics in a language like Java, simply by using lambdas and regular functions on basic data types. You can decompose your problem functionally to express "generic" algorithms without needing to define actual generic containers or methods.
